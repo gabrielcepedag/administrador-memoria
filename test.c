@@ -8,7 +8,7 @@
 #define POPITEM(a)    popItem (a, a->item.arr->length - 1 )
 
 PITEM createItem()
-{
+{  
    PITEM pitem = xxmalloc( sizeof( ITEM ) );
    pitem->refer = 1;
    pitem->id = pitem->refer + 1;
