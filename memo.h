@@ -63,6 +63,7 @@ typedef struct strBaseArray{
 }BASE_ARRAY;
 
 typedef struct {
+   size_t free;
    size_t id;
    size_t capacity;
    size_t length;
