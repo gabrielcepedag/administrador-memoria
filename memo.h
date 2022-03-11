@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 //#define XXMALLOC(a) xxmalloc(a, __LINE__)
 
@@ -26,6 +27,8 @@ typedef struct{
 #define ITEM_TYPE_ARRAY   4
 #define ITEM_TYPE_UNKNOWN 5
 
+#define MAX_SIZE 100
+
 //#define ITEM_IS_NONE( p ) (p)->type == ITEM_TYPE_NONE
 
 struct strItem;
@@ -35,6 +38,7 @@ typedef struct {
    int type;
    int refer;
    size_t id;
+   unsigned int key;
 
    union {
       void *pointer;
@@ -57,5 +61,13 @@ typedef struct strBaseArray{
    ITEM_ARRAY* item;
 
 }BASE_ARRAY;
+
+typedef struct {
+   size_t id;
+   size_t capacity;
+   size_t length;
+   PITEM item[MAX_SIZE];
+
+}HASH_TABLE;
 
 #endif

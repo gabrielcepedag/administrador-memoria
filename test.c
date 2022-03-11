@@ -1,11 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "memo.h"
 #include ".\AdministradorMemoria.c"
 
 #define PUTCONTENT(a) putContent( a, a->item.arr->length - 1 )
 #define POPITEM(a)    popItem (a, a->item.arr->length - 1 )
+
+static int id = 0;
+HASH_TABLE *arrHash[5];
+size_t ind = 0;
 
 PITEM createItem()
 {  
@@ -13,6 +18,8 @@ PITEM createItem()
    pitem->refer = 1;
    pitem->id = pitem->refer + 1;
    pitem->type = ITEM_TYPE_NONE;
+   //pitem->key = rand();
+   pitem->key = 1987;
 
    return pitem;
 }
@@ -257,12 +264,12 @@ size_t indexOf( PITEM pitem, void *ptr )
    if ( pitem->type == ITEM_TYPE_ARRAY ){
 
       for ( int ind = 0; ind < lenght; ind++ ){
-         if ( pitem->item.arr->item[ind].pitem->item.number == ptr )
+         //if ( pitem->item.arr->item[ind].pitem->item.number == ptr )
+         //   return ind;
+         if ( (strcmp(pitem->item.arr->item[ind].pitem->item.str, ptr )) == 0)
             return ind;
-         else if ( (strcmp(pitem->item.arr->item[ind].pitem->item.str, ptr )) == 0)
-            return ind;
-         else if ( pitem->item.arr->item[ind].pitem->item.pointer == ptr )
-            return ind;
+        // else if ( pitem->item.arr->item[ind].pitem->item.pointer == ptr )
+         //   return ind;
          else if ( pitem->item.arr->item[ind].pitem->item.arr == ptr )
             return ind;
       }
@@ -285,7 +292,188 @@ size_t removeItem( PITEM pitem, void *ptr)
    return -1;
 }
 
+HASH_TABLE* newTable( int n )
+{
+   int tamagno = n + (n/2);
+   HASH_TABLE *table;
+
+   table = (HASH_TABLE*) xxmalloc( sizeof( HASH_TABLE) );
+
+   table->length = 0;
+   table->capacity = tamagno;
+   table->id = id;
+   id++;
+
+   for (int i = 0; i < tamagno; i++) {
+      table->item[i] = xxmalloc( sizeof(ITEM) );
+      table->item[i] = NULL;
+   }
+   arrHash[ind] = table;
+   ind++;
+
+   return table;
+}
+
+HASH_TABLE* findTableById(size_t id)
+{
+   for (int i = 0; i < ind; i++) {
+      if (arrHash[i]->id == id)
+         return arrHash[i];
+   }
+   return NULL;
+}
+
+int hashKey(size_t id, PITEM item )
+{
+   HASH_TABLE* table = findTableById(id);
+   if (table == NULL)
+      return -1;
+
+   return  (item->key << 2 + item->key >> 5) % table->capacity;
+}
+
+int insertElement(size_t id, PITEM item)
+{
+   HASH_TABLE* table = findTableById(id);
+   if (table == NULL)
+      return -1;
+
+   int index = hashKey(id,item);
+   if ( table->length < table->capacity ){
+
+      if ( table->item[index] == NULL ){
+         table->item[index] = copyItem(item);
+         table->length++;
+      }else{
+
+         while ( true ){
+            index = (index + 1) % table->capacity;
+
+            if ( table->item[index] == NULL ){
+               table->item[index] = copyItem(item);
+               table->length++;
+               break;
+            }
+         }
+      }
+   }else{
+      return -1;
+   }
+   return index;
+}
+
+int findElement(size_t id, PITEM item)
+{
+   HASH_TABLE* table = findTableById(id);
+   int index = hashKey(id,item);
+   int cont = 0;
+
+   if (index == -1)
+      return -1;
+   
+   if ( table->item[index] == item )
+      return index;
+   else{
+       while ( cont < table->capacity ){
+            index = (index + 1) % table->capacity;
+
+            if ( table->item[index] == item ){
+               return index;
+            }
+            cont++;
+         }
+   }
+   return -2;
+}
+
+int deleteElement(size_t id, PITEM item)
+{
+   HASH_TABLE* table = findTableById(id);
+   int index = hashKey(id,item);
+   int cont = 0;
+
+   if ( index == -1 )
+      return -1;
+
+   if ( table->item[index] == item ){
+      deleteItem(item);
+      table->item[index] = NULL;
+      return index;
+   }
+   else{
+       while ( cont < table->capacity ){
+            index = (index + 1) % table->capacity;
+
+            if ( table->item[index] == item ){
+               deleteItem(item);
+               table->item[index] = NULL;
+               return index;
+            }
+            cont++;
+         }
+   }
+
+}
+
 int main()
+{
+   srand(time(NULL));
+   HASH_TABLE *hash;
+
+   hash = newTable( 10 );
+
+   PITEM item = createItem();
+   putNumber( item, 69);
+
+   int indice = insertElement(0,item);
+   printf("KEY: %d\n",item->key);
+
+   int ind1 = findElement(0,item);
+   printf("%d\n",ind1);
+
+   printf("contenido: %d\n",hash->item[ind1]->item.number);
+
+   PITEM item2 = createItem();
+   putNumber( item2,11);
+
+   insertElement(0,item2);
+   printf("KEY: %d\n",item2->key);
+
+   int ind2 = findElement(0,item2);
+   printf("%d\n",ind2);
+
+   printf("contenido: %d\n",hash->item[ind2]->item.number);
+
+   deleteElement(0,item2);
+
+   PITEM item3 = createItem();
+   putNumber( item3,44);
+
+   insertElement(0,item3);
+   printf("KEY: %d\n",item3->key);
+
+   int ind3 = findElement(0,item3);
+   printf("%d\n",ind3);
+
+   printf("contenido: %d\n",hash->item[ind3]->item.number);
+
+
+   return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*int main2()
 {
    char *chr = (char*)'c';
    PITEM number = createItem();
@@ -365,4 +553,4 @@ int main()
    printf("Reservado despues de liberar el array: %d\n",infoReservado());
 
    return 0;
-}
+}*/
