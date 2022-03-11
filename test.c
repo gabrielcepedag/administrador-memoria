@@ -444,8 +444,6 @@ int main()
 
    printf("contenido: %d\n",hash->item[ind2]->item.number);
 
-   deleteElement(0,item2);
-
    PITEM item3 = createItem();
    putNumber( item3,44);
 
@@ -457,6 +455,7 @@ int main()
 
    printf("contenido: %d\n",hash->item[ind3]->item.number);
 
+   printf("RESERVADO.... %d\n",infoReservado());
 
    return 0;
 }
