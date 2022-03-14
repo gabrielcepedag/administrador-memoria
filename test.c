@@ -294,9 +294,10 @@ size_t removeItem( PITEM pitem, void *ptr)
    return -1;
 }
 
-HASH_TABLE* newTable( int n )
+PITEM createTable( int n )
 {
    int tamagno = n + (n/2);
+   PITEM pitem = createItem();
    HASH_TABLE *table;
 
    table = (HASH_TABLE*) xxmalloc( sizeof(HASH_TABLE) );
@@ -310,10 +311,13 @@ HASH_TABLE* newTable( int n )
    for (int i = 0; i < tamagno; i++) {
       table->item[i] = NULL;
    }
+   
    arrHash[ind] = table;
    ind++;
+   pitem->item.table = table;
+   pitem->type = ITEM_TYPE_HASH;
 
-   return table;
+   return pitem;
 }
 
 HASH_TABLE* findTableById(size_t idTable)
@@ -325,35 +329,32 @@ HASH_TABLE* findTableById(size_t idTable)
    return NULL;
 }
 
-int hashKey(size_t id, PITEM item )
+int hashKey(PITEM table, PITEM item )
 {
-   HASH_TABLE* table = findTableById(id);
    if (table == NULL)
       return -1;
 
-   return  (item->key << 2 + item->key >> 5) % table->capacity;
+   return  (item->key << 2 + item->key >> 5) % table->item.table->capacity;
 }
 
-int insertElement(size_t id, PITEM item)
-{
-   HASH_TABLE* table = findTableById(id);
-   if (table == NULL)
-      return -1;
+int insertElement(PITEM table, PITEM item)
+{  
 
-   int index = hashKey(id,item);
-   if ( table->length < table->capacity ){
+   int index = hashKey(table,item);
+   
+   if ( table->item.table->length < table->item.table->capacity ){
 
-      if ( table->item[index] == NULL ){
-         table->item[index] = copyItem(item);
-         table->length++;
+      if ( table->item.table->item[index] == NULL ){
+         table->item.table->item[index] = copyItem(item);
+         table->item.table->length++;
       }else{
 
          while ( true ){
-            index = (index + 1) % table->capacity;
+            index = (index + 1) % table->item.table->capacity;
 
-            if ( table->item[index] == NULL ){
-               table->item[index] = copyItem(item);
-               table->length++;
+            if ( table->item.table->item[index] == NULL ){
+               table->item.table->item[index] = copyItem(item);
+               table->item.table->length++;
                break;
             }
          }
@@ -364,22 +365,22 @@ int insertElement(size_t id, PITEM item)
    return index;
 }
 
-int findElement(size_t id, PITEM item)
+int findElement(PITEM table, PITEM item)
 {
-   HASH_TABLE* table = findTableById(id);
-   int index = hashKey(id,item);
+   
+   int index = hashKey(table,item);
    int cont = 0;
 
    if (index == -1)
       return -1;
    
-   if ( table->item[index] == item )
+   if ( table->item.table->item[index] == item )
       return index;
    else{
-       while ( cont < table->capacity ){
-            index = (index + 1) % table->capacity;
+       while ( cont < table->item.table->capacity ){
+            index = (index + 1) % table->item.table->capacity;
 
-            if ( table->item[index] == item ){
+            if ( table->item.table->item[index] == item ){
                return index;
             }
             cont++;
@@ -388,27 +389,26 @@ int findElement(size_t id, PITEM item)
    return -2;
 }
 
-int deleteElement(size_t id, PITEM item)
+int deleteElement(PITEM table, PITEM item)
 {
-   HASH_TABLE* table = findTableById(id);
-   int index = hashKey(id,item);
+   int index = hashKey(table,item);
    int cont = 0;
 
    if ( index == -1 )
       return -1;
 
-   if ( table->item[index] == item ){
-      deleteItem(table->item[index]);
-      table->item[index] = NULL;
+   if ( table->item.table->item[index] == item ){
+      deleteItem(table->item.table->item[index]);
+      table->item.table->item[index] = NULL;
       return index;
    }
    else{
-       while ( cont < table->capacity ){
-            index = (index + 1) % table->capacity;
+       while ( cont < table->item.table->capacity ){
+            index = (index + 1) % table->item.table->capacity;
 
-            if ( table->item[index] == item ) {
-               deleteItem( table->item[index] );
-               table->item[index] = NULL;
+            if ( table->item.table->item[index] == item ) {
+               deleteItem( table->item.table->item[index] );
+               table->item.table->item[index] = NULL;
                return index;
             }
             cont++;
@@ -416,92 +416,81 @@ int deleteElement(size_t id, PITEM item)
    }
 }
 
-size_t deleteHashTable(size_t idTable)
+size_t deleteHashTable(PITEM table)
 {
-   HASH_TABLE* table = findTableById(idTable);
-
-   if ( table == NULL )
+   if ( table == NULL || table->type != ITEM_TYPE_HASH )
       return -1;
 
-   for (int ind = 0; ind < table->capacity; ind++){
-      if ( table->item[ind] != NULL ){
-         deleteItem(table->item[ind]);
-         table->item[ind] = NULL;
+   for (int ind = 0; ind < table->item.table->capacity; ind++){
+      if ( table->item.table->item[ind] != NULL ){
+         deleteItem(table->item.table->item[ind]);
+         table->item.table->item[ind] = NULL;
       }
    }
-   xxfree( table );
-   
-   arrHash[idTable]->free = 1;
+   xxfree( table->item.table );
+   deleteItem(table);
 
    return 0;
 }
 
-void printHashTable(size_t id)
+void printHashTable(PITEM itemTable)
 { 
-   HASH_TABLE* table = findTableById( id );
+   size_t size = itemTable->item.table->capacity;
 
-   for (int ind = 0; ind < table->capacity; ind++){
-      if ( table->item[ind] != NULL ){
-         if ( table->item[ind]->type == ITEM_TYPE_INTEGER )
-            printf("El contenido en la posicion[%d] del hash[%d] es: %d\n",ind,table->id,table->item[ind]->item.number);
-         else if ( table->item[ind]->type == ITEM_TYPE_STRING )
-            printf("El contenido en la posicion [%d] del hash[%d] es: %s\n",ind,table->id,table->item[ind]->item.str);
-         else if ( table->item[ind]->type == ITEM_TYPE_POINTER )
-            printf("El contenido en la posicion [%d] del hash[%d] es un puntero\n",ind,table->id);
-         else if ( table->item[ind]->type == ITEM_TYPE_ARRAY )
-            printf("El contenido en la posicion [%d] del hash[%d] es un arreglo.\n",ind,table->id);
-         else if ( table->item[ind]->type == ITEM_TYPE_UNKNOWN )
-            printf("El contenido en la posicion [%d] del hash[%d] es desconocido.\n",ind,table->id);
+   if (itemTable->type == ITEM_TYPE_HASH) {
+      for (int ind = 0; ind < size; ind++){
+      if ( itemTable->item.table->item[ind] != NULL ){
+         if (itemTable->item.table->item[ind]->type == ITEM_TYPE_INTEGER )
+            printf("El contenido en la posicion[%d] del IDhash: %d es: %d\n",ind,itemTable->item.table->id,itemTable->item.table->item[ind]->item.number);
+         else if ( itemTable->item.table->item[ind]->type == ITEM_TYPE_STRING )
+            printf("El contenido en la posicion [%d] del IDhash: %d es: %s\n",ind,itemTable->item.table->id,itemTable->item.table->item[ind]->item.str);
+         else if ( itemTable->item.table->item[ind]->type == ITEM_TYPE_POINTER )
+            printf("El contenido en la posicion [%d] del IDhash: %d es un puntero\n",ind,itemTable->item.table->id);
+         else if ( itemTable->item.table->item[ind]->type == ITEM_TYPE_ARRAY )
+            printf("El contenido en la posicion [%d] del IDhash: %d es un arreglo.\n",ind,itemTable->item.table->id);
+         else if ( itemTable->item.table->item[ind]->type == ITEM_TYPE_UNKNOWN )
+            printf("El contenido en la posicion [%d] del IDhash: %d es desconocido.\n",ind,itemTable->item.table->id);
       }  
    }
+   }else
+      printf("Este no es un ITEM de tipo HASH...\n");
+   
 }
 
 int main()
 {
    srand(time(NULL));
-   HASH_TABLE *hash;
-   HASH_TABLE *numeros;
 
-   hash = newTable( 10 );
-
-   PITEM item2 = createItem();
-   putString( item2,"Hola");
-   printf("IND1: %d\n",insertElement(0,item2));
-
-   char *ptr = 'A';
-   PITEM item3 = createItem();
-   putPointer( item3,ptr );
-   printf("IND2: %d\n",insertElement(0,item3));
-
-   PITEM item4 = createItem();
-   putNumber( item4, 100);
-   printf("IND4: %d\n",insertElement(0,item4));
-   /////////////////////////////////////////////////////////////////////////////////////////////
-   numeros = newTable(5);
+   PITEM table = createTable( 10 );
 
    PITEM item = createItem();
-   putNumber( item, 69);
-   printf("\nIND1: %d\n",insertElement(1,item));  
+   putNumber(item,100);
+   insertElement(table,item);
 
-   PITEM item5 = createItem();
-   putNumber( item5, 210);
-   printf("IND2: %d\n\n",insertElement(1,item5)); 
+   PITEM item2 = createItem();
+   putNumber(item2,200);
+   insertElement(table,item2);
 
-   printHashTable(0);
-   printf("--------------\n");
-   printHashTable(1);
+   PITEM item3 = createItem();
+   putString(item3,"Hello world");
+   insertElement(table,item3);
+
+   printHashTable(table);
+
+   printf("Reservado antes: %d\n",infoReservado());
+
+   deleteElement(table,item);
+   deleteElement(table,item2);
+   deleteElement(table,item3);
 
    deleteItem(item);
    deleteItem(item2);
    deleteItem(item3);
-   deleteItem(item4);
-   deleteItem(item5);
 
-   printf("\n\n");
+   deleteHashTable(table);
 
-   deleteHashTable(0);
-   deleteHashTable(1);
-   printf("\nReservado al final: %d\n",infoReservado());
+   printf("Reservado despues: %d\n",infoReservado());
+
 
    return 0;
 }

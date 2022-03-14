@@ -25,7 +25,8 @@ typedef struct{
 #define ITEM_TYPE_POINTER 2
 #define ITEM_TYPE_INTEGER 3
 #define ITEM_TYPE_ARRAY   4
-#define ITEM_TYPE_UNKNOWN 5
+#define ITEM_TYPE_HASH    5
+#define ITEM_TYPE_UNKNOWN 6
 
 #define MAX_SIZE 100
 
@@ -33,6 +34,7 @@ typedef struct{
 
 struct strItem;
 struct strBaseArray;
+struct strHashTable;
 
 typedef struct {
    int type;
@@ -45,6 +47,7 @@ typedef struct {
       int number;
       char str[ 30 ];
       struct strBaseArray* arr;
+      struct strHashTable* table;
    }item;
 
 } ITEM, *PITEM;
@@ -62,7 +65,7 @@ typedef struct strBaseArray{
 
 }BASE_ARRAY;
 
-typedef struct {
+typedef struct strHashTable{
    size_t free;
    size_t id;
    size_t capacity;
