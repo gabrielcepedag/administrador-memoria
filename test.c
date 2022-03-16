@@ -479,9 +479,9 @@ int main()
 
    printf("Reservado antes: %d\n",infoReservado());
 
-   deleteElement(table,item);
-   deleteElement(table,item2);
-   deleteElement(table,item3);
+   printf("%d\n",deleteElement(table,item));
+   printf("%d\n",deleteElement(table,item2));
+   printf("%d\n",deleteElement(table,item3));
 
    deleteItem(item);
    deleteItem(item2);
