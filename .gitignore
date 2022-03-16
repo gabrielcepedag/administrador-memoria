@@ -1,0 +1,5 @@
+*.exe
+*.gch
+test
+testhash
+.vscode
