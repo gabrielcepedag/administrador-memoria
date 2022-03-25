@@ -1,5 +1,3 @@
-
-
 #include "memo.h"
 #include "hashes.h"
 
@@ -121,7 +119,6 @@ static PITEM hashValuePtr(PBASEHASH pBaseHash, PITEM pKey)
 
 BOOL hashAdd(PITEM pHash, PITEM pKey, PITEM pValue)
 {
-
   if (IS_HASH(pHash) && IS_HASHKEY(pKey))
   {
     PITEM pDest = hashValuePtr(pHash->item.hash.value, pKey);
@@ -134,4 +131,73 @@ BOOL hashAdd(PITEM pHash, PITEM pKey, PITEM pValue)
   }
 
   return FALSE;
+}
+
+PITEM hashFindValue(PITEM hash, PITEM pKey){
+
+  if ( IS_HASH(hash) && IS_HASHKEY(pKey)){
+
+    size_t pos;
+    PBASEHASH baseHash = (PBASEHASH)hash->item.hash.value;
+
+    if ( hashFind(baseHash, pKey, &pos) ){
+      return &baseHash->pPairs[pos].value;
+    }
+  }
+  return NULL;
+}
+
+void reordenarHash(PITEM pHash, size_t index)
+{
+  PBASEHASH baseHash = (PBASEHASH)pHash->item.hash.value;
+  int len = baseHash->length;
+  int ind = index + 1;
+
+  for(index; index <= len; index++, ind++){
+    baseHash->pPairs[ind].iPos--;
+    baseHash->pPairs[index].key = baseHash->pPairs[ind].key;
+    baseHash->pPairs[index].value = baseHash->pPairs[ind].value;
+  }
+
+  return;
+}
+
+BOOL hashDeleteItem(PITEM pHash, PITEM pKey)
+{
+  if ( IS_HASH(pHash) && IS_HASHKEY(pKey) ){
+
+    size_t pos;
+    if ( hashFind(pHash->item.hash.value, pKey, &pos) ){
+      
+      PBASEHASH base = (PBASEHASH)pHash->item.hash.value;
+
+      ITEM key, value;
+      key = base->pPairs[pos].key;
+      value = base->pPairs[pos].value;
+
+      deleteItem(&key);
+      deleteItem(&value);
+
+      base->length -= 1;
+      reordenarHash(pHash, pos);
+
+      return TRUE;
+    }
+  }
+  return FALSE;
+
+}
+
+void printHashContent(PITEM hash)
+{
+  if ( IS_HASH(hash) ){
+    PBASEHASH baseHash = (PBASEHASH)hash->item.hash.value;
+    for (int i = 0; i < baseHash->length; i++){
+
+      ITEM key = hash->item.hash.value->pPairs[i].key;
+      ITEM value = hash->item.hash.value->pPairs[i].value;
+      printf("el key #%d es %s el valor es: %s\n", i, key.item.str, value.item.str);
+    }
+    printf("\n\n");
+  }
 }

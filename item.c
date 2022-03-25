@@ -299,9 +299,9 @@ size_t indexOf(PITEM pitem, void *ptr)
 
     for (int ind = 0; ind < lenght; ind++)
     {
-      if (pitem->item.arr->item[ind].pitem->item.number == ptr)
-        return ind;
-      else if ((strcmp(pitem->item.arr->item[ind].pitem->item.str, ptr)) == 0)
+      //if (pitem->item.arr->item[ind].pitem->item.number == ptr)
+       // return ind;
+      if ((strcmp(pitem->item.arr->item[ind].pitem->item.str, ptr)) == 0)
         return ind;
       else if (pitem->item.arr->item[ind].pitem->item.pointer == ptr)
         return ind;

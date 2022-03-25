@@ -79,7 +79,6 @@ void memory_info(void *pointer)
 
 void memory_stat()
 {
-
   printf("Cantidad de bloques reservados -> %d bytes\n", infoReservado());
 
   return;
