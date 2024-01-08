@@ -69,8 +69,8 @@ void memory_info(void *pointer)
    memset(&temp,0x00,size_struct);
    temp = (INFO*)xxcopy(pointer-size_struct);
 
-   printf("Cantidad de bloques reservados -> %d bytes\n",temp->size);
-   printf("Referencia del puntero: %d\n",temp->referencia);
+   printf("Cantidad de bloques reservados -> %zu bytes\n",temp->size);
+   printf("Referencia del puntero: %zu\n",temp->referencia);
 
    return;
 }

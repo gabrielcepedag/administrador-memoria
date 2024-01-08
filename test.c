@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "memo.h"
-#include ".\AdministradorMemoria.c"
+#include "AdministradorMemoria.c"
 
 #define PUTCONTENT(a) putContent( a, a->item.arr->length - 1 )
 #define POPITEM(a)    popItem (a, a->item.arr->length - 1 )
@@ -143,7 +143,7 @@ void pushArrayItem(PITEM pitem, PITEM ptr)
    }
    else if( index >= pitem->item.arr->capacity ) {
       printf("Error al intentar a%cadir un item al array.\n",164);
-      printf("La cantidad de espacio solicitada fue de: %d y ya hay %d items agregados.\n\n",pitem->item.arr->length,index);
+      printf("La cantidad de espacio solicitada fue de: %zu y ya hay %zu items agregados.\n\n",pitem->item.arr->length,index);
    }
    else{
       printf("Error al intentar a%cadir un item al array por razones desconocidas.\n",164);
@@ -153,16 +153,16 @@ void pushArrayItem(PITEM pitem, PITEM ptr)
 void putContent(PITEM pitem, size_t index)
 {
    if (pitem->type == ITEM_TYPE_ARRAY && pitem->item.arr->item[index].pitem->type == ITEM_TYPE_INTEGER ){
-      printf("El contenido en la posicion [%d] es: %d\n",index,pitem->item.arr->item[index].pitem->item.number);
+      printf("El contenido en la posicion [%zu] es: %d\n",index,pitem->item.arr->item[index].pitem->item.number);
    }
    else if (pitem->type == ITEM_TYPE_ARRAY && pitem->item.arr->item[index].pitem->type == ITEM_TYPE_STRING ){
-      printf("El contenido en la posicion [%d] es: %s\n",index,pitem->item.arr->item[index].pitem->item.str);
+      printf("El contenido en la posicion [%zu] es: %s\n",index,pitem->item.arr->item[index].pitem->item.str);
    }
    else if (pitem->type == ITEM_TYPE_ARRAY && pitem->item.arr->item[index].pitem->type == ITEM_TYPE_POINTER){
-      printf("El contenido en la posicion [%d] es un puntero.\n",index);
+      printf("El contenido en la posicion [%zu] es un puntero.\n",index);
    }
    else if (pitem->type == ITEM_TYPE_ARRAY && pitem->item.arr->item[index].pitem->type > ITEM_TYPE_UNKNOWN){
-      printf("Hay problema con la asignacion de tipo del ITEM en el indice: [%d]\n",index);
+      printf("Hay problema con la asignacion de tipo del ITEM en el indice: [%zu]\n",index);
    }
    else if (pitem->type != ITEM_TYPE_ARRAY){
       printf("Esto no es un item de tipo arreglo.\n");
@@ -295,7 +295,7 @@ int main()
    PITEM str2 = createItem();
 
    putNumber(number,55);
-   putString(str,"hola");
+   putString(str,"Hola");
    putPointer(ptr,chr);
    putString(str2,"Adios");
    putNumber(n1,12);
@@ -326,10 +326,10 @@ int main()
    PITEM prueba2 = createItem();
 
    putNumber( number10,44 );
-   putString(sstr2,"La para");
+   putString(sstr2,"Hello");
    putNumber(n2,9);
    putNumber(prueba,100);
-   putString(prueba2,"GAbriel");
+   putString(prueba2,"Good Bye");
 
    p3 = reallocArray( p3,11 );
 
@@ -357,12 +357,12 @@ int main()
 
    printList(p3);
 
-   printf("Reservado antes de liberar el array: %d\n",infoReservado());
+   printf("Reservado antes de liberar el array: %zu\n",infoReservado());
 
    deleteArray(p3);
    deleteArray(p2);
 
-   printf("Reservado despues de liberar el array: %d\n",infoReservado());
+   printf("Reservado despues de liberar el array: %zu\n",infoReservado());
 
    return 0;
 }
