@@ -167,7 +167,7 @@ void pushArrayItem(PITEM pitem, PITEM ptr)
   else if (index >= pitem->item.arr->capacity)
   {
     printf("Error al intentar a%cadir un item al array.\n", 164);
-    printf("La cantidad de espacio solicitada fue de: %d y ya hay %d items agregados.\n\n", pitem->item.arr->length, index);
+    printf("La cantidad de espacio solicitada fue de: %zu y ya hay %zu items agregados.\n\n", pitem->item.arr->length, index);
   }
   else
   {
@@ -179,19 +179,19 @@ void putContent(PITEM pitem, size_t index)
 {
   if (pitem->type == ITEM_TYPE_ARRAY && pitem->item.arr->item[index].pitem->type == ITEM_TYPE_INTEGER)
   {
-    printf("El contenido en la posicion [%d] es: %d\n", index, pitem->item.arr->item[index].pitem->item.number);
+    printf("El contenido en la posicion [%zu] es: %d\n", index, pitem->item.arr->item[index].pitem->item.number);
   }
   else if (pitem->type == ITEM_TYPE_ARRAY && pitem->item.arr->item[index].pitem->type == ITEM_TYPE_STRING)
   {
-    printf("El contenido en la posicion [%d] es: %s\n", index, pitem->item.arr->item[index].pitem->item.str);
+    printf("El contenido en la posicion [%zu] es: %s\n", index, pitem->item.arr->item[index].pitem->item.str);
   }
   else if (pitem->type == ITEM_TYPE_ARRAY && pitem->item.arr->item[index].pitem->type == ITEM_TYPE_POINTER)
   {
-    printf("El contenido en la posicion [%d] es un puntero.\n", index);
+    printf("El contenido en la posicion [%zu] es un puntero.\n", index);
   }
   else if (pitem->type == ITEM_TYPE_ARRAY && pitem->item.arr->item[index].pitem->type > ITEM_TYPE_UNKNOWN)
   {
-    printf("Hay problema con la asignacion de tipo del ITEM en el indice: [%d]\n", index);
+    printf("Hay problema con la asignacion de tipo del ITEM en el indice: [%zu]\n", index);
   }
   else if (pitem->type != ITEM_TYPE_ARRAY)
   {

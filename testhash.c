@@ -1,8 +1,8 @@
 #include "memo.h"
 #include "hashes.h"
-#include ".\memo.c"
-#include ".\hashes.c"
-#include ".\item.c"
+#include "memo.c"
+#include "hashes.c"
+#include "item.c"
 
 int main()
 {
